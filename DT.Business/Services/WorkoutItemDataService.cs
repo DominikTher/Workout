@@ -15,11 +15,8 @@ namespace DT.Business.Services
         private readonly IWorkoutItemRepository workoutItemRepository;
         private readonly IMapper mapper;
 
-        public WorkoutItemDataService(IWorkoutItemRepository workoutItemRepository, IMapper mapper) : base(workoutItemRepository as IEntityRepository, mapper)
-        {
-            this.workoutItemRepository = workoutItemRepository;
-            this.mapper = mapper;
-        }
+        public WorkoutItemDataService(IWorkoutItemRepository workoutItemRepository, IMapper mapper)
+            : base(workoutItemRepository as IEntityRepository, mapper) => (this.workoutItemRepository, this.mapper) = (workoutItemRepository, mapper);
 
         public async Task<IEnumerable<WorkoutItem>> GetAsync(int workoutId)
         {

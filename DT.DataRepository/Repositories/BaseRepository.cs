@@ -11,10 +11,7 @@ namespace DT.DataRepository.Repositories
     {
         private readonly Func<WorkoutContext> contextFactory;
 
-        public BaseRepository(Func<WorkoutContext> contextFactory)
-        {
-            this.contextFactory = contextFactory;
-        }
+        public BaseRepository(Func<WorkoutContext> contextFactory) => this.contextFactory = contextFactory;
 
         public async Task<T> AddAsync<T>(T entity) where T : class
         {

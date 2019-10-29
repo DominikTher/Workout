@@ -14,10 +14,7 @@ namespace DT.DataRepository.Repositories
         private readonly Func<WorkoutContext> seriesContextFactory;
 
         public SeriesRepository(Func<WorkoutContext> seriesContextFactory)
-            : base(seriesContextFactory)
-        {
-            this.seriesContextFactory = seriesContextFactory;
-        }
+            : base(seriesContextFactory) => this.seriesContextFactory = seriesContextFactory;
 
         public async Task<IEnumerable<Series>> GetByWorkoutItemId(int workoutItemId)
         {

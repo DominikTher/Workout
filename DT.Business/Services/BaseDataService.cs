@@ -14,11 +14,8 @@ namespace DT.Business.Services
         private readonly IEntityRepository entityRepository;
         private readonly IMapper mapper;
 
-        public BaseDataService(IEntityRepository entityRepository, IMapper mapper)
-        {
-            this.entityRepository = entityRepository;
-            this.mapper = mapper;
-        }
+        public BaseDataService(IEntityRepository entityRepository, IMapper mapper) => (this.entityRepository, this.mapper) = (entityRepository, mapper);
+
 
         public async Task<TClient> AddAsync<TClient, TBusiness>(TClient entity)
             where TClient : class

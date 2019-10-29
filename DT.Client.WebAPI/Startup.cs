@@ -37,7 +37,7 @@ namespace DT.Client.WebAPI
             services.AddScoped<IWorkoutItemRepository, WorkoutItemRepository>(service => new WorkoutItemRepository(service.GetRequiredService<WorkoutContext>));
             services.AddScoped<ISeriesDataService, SeriesDataService>();
             services.AddScoped<ISeriesRepository, SeriesRepository>(service => new SeriesRepository(service.GetRequiredService<WorkoutContext>));
-            services.AddDbContext<WorkoutContext>(options => options.UseSqlServer(@"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Workout;Integrated Security=True;"));
+            services.AddDbContext<WorkoutContext>(options => options.UseSqlite(@"Data Source=workout.db"));
 
             services.AddControllers();
             services.AddApiVersioning(options =>
@@ -90,7 +90,7 @@ namespace DT.Client.WebAPI
         public WorkoutContext CreateDbContext(string[] args)
         {
             var builder = new DbContextOptionsBuilder<WorkoutContext>();
-            builder.UseSqlServer(@"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Workout;Integrated Security=True;");
+            builder.UseSqlite(@"Data Source=workout.db");
             return new WorkoutContext(builder.Options);
         }
     }

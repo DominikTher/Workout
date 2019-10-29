@@ -13,10 +13,8 @@ namespace DT.DataRepository.Repositories
     {
         private readonly Func<WorkoutContext> workoutContextFactory;
 
-        public WorkoutItemRepository(Func<WorkoutContext> workoutContextFactory) : base(workoutContextFactory)
-        {
-            this.workoutContextFactory = workoutContextFactory;
-        }
+        public WorkoutItemRepository(Func<WorkoutContext> workoutContextFactory)
+            : base(workoutContextFactory) => this.workoutContextFactory = workoutContextFactory;
 
         public async Task<IEnumerable<WorkoutItem>> GetAsync(int workoutId)
         {

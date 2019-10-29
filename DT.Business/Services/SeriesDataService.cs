@@ -17,12 +17,8 @@ namespace DT.Business.Services
         private readonly ISeriesRepository seriesRepository;
         private readonly IMapper mapper;
 
-        public SeriesDataService(ISeriesRepository seriesRepository, IMapper mapper) 
-            : base(seriesRepository as IEntityRepository, mapper)
-        {
-            this.seriesRepository = seriesRepository;
-            this.mapper = mapper;
-        }
+        public SeriesDataService(ISeriesRepository seriesRepository, IMapper mapper)
+            : base(seriesRepository as IEntityRepository, mapper) => (this.seriesRepository, this.mapper) = (seriesRepository, mapper);
 
         public async Task<IEnumerable<Series>> GetByWorkoutItemId(int workoutItemId)
         {
