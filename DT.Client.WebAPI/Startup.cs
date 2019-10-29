@@ -15,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using System;
 
 namespace DT.Client.WebAPI
 {
@@ -30,6 +31,9 @@ namespace DT.Client.WebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            Action<DbContextOptionsBuilder> sqlProvider = (options) => options.UseSqlServer(Configuration.GetConnectionString("SQL"));
+            Action<DbContextOptionsBuilder> sqliteProvider = (options) => options.UseSqlite(Configuration.GetConnectionString("SQLite"));
+
             services.AddScoped<IDataService, BaseDataService>();
             services.AddScoped<IEntityRepository, BaseRepository>(service => new BaseRepository(service.GetRequiredService<WorkoutContext>));
             services.AddSingleton<IMapper>(service => new Mapper(new AutoMapperConfiguration().SetUpAutoMapper()));
@@ -37,7 +41,7 @@ namespace DT.Client.WebAPI
             services.AddScoped<IWorkoutItemRepository, WorkoutItemRepository>(service => new WorkoutItemRepository(service.GetRequiredService<WorkoutContext>));
             services.AddScoped<ISeriesDataService, SeriesDataService>();
             services.AddScoped<ISeriesRepository, SeriesRepository>(service => new SeriesRepository(service.GetRequiredService<WorkoutContext>));
-            services.AddDbContext<WorkoutContext>(options => options.UseSqlite(@"Data Source=workout.db"));
+            services.AddDbContext<WorkoutContext>(sqlProvider);
 
             services.AddControllers();
             services.AddApiVersioning(options =>
@@ -85,13 +89,15 @@ namespace DT.Client.WebAPI
         }
     }
 
-    public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<WorkoutContext>
-    {
-        public WorkoutContext CreateDbContext(string[] args)
-        {
-            var builder = new DbContextOptionsBuilder<WorkoutContext>();
-            builder.UseSqlite(@"Data Source=workout.db");
-            return new WorkoutContext(builder.Options);
-        }
-    }
+    /// TODO: Connection string
+
+    //public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<WorkoutContext>
+    //{
+    //    public WorkoutContext CreateDbContext(string[] args)
+    //    {
+    //        var builder = new DbContextOptionsBuilder<WorkoutContext>();
+    //        builder.UseSqlite(@"Data Source=workout.db");
+    //        return new WorkoutContext(builder.Options);
+    //    }
+    //}
 }
