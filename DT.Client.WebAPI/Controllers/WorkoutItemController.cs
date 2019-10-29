@@ -10,7 +10,7 @@ using WorkoutItemBusiness = DT.Business.Entities.WorkoutItem;
 namespace DT.Client.WebAPI.Controllers
 {
     [ApiVersion("1.0")]
-    [Route("api/{controller}")]
+    [Route("api/[controller]")]
     [ApiController]
     public class WorkoutItemController : ControllerBase
     {
