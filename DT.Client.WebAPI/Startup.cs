@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -28,7 +27,6 @@ namespace DT.Client.WebAPI
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             Action<DbContextOptionsBuilder> sqlProvider = (options) => options.UseSqlServer(Configuration.GetConnectionString("SQL"));
@@ -41,7 +39,7 @@ namespace DT.Client.WebAPI
             services.AddScoped<IWorkoutItemRepository, WorkoutItemRepository>(service => new WorkoutItemRepository(service.GetRequiredService<WorkoutContext>));
             services.AddScoped<ISeriesDataService, SeriesDataService>();
             services.AddScoped<ISeriesRepository, SeriesRepository>(service => new SeriesRepository(service.GetRequiredService<WorkoutContext>));
-            services.AddDbContext<WorkoutContext>(sqlProvider);
+            services.AddDbContext<WorkoutContext>(sqliteProvider);
 
             services.AddControllers();
             services.AddApiVersioning(options =>
@@ -51,14 +49,12 @@ namespace DT.Client.WebAPI
                 options.ApiVersionReader = new QueryStringApiVersionReader("v");
             });
 
-            // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Workout API", Version = "v1" });
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -67,19 +63,15 @@ namespace DT.Client.WebAPI
             }
 
             app.UseHttpsRedirection();
-
-            // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
 
-            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
-            // specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Workout API V1");
             });
 
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
@@ -88,16 +80,4 @@ namespace DT.Client.WebAPI
             });
         }
     }
-
-    /// TODO: Connection string
-
-    //public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<WorkoutContext>
-    //{
-    //    public WorkoutContext CreateDbContext(string[] args)
-    //    {
-    //        var builder = new DbContextOptionsBuilder<WorkoutContext>();
-    //        builder.UseSqlite(@"Data Source=workout.db");
-    //        return new WorkoutContext(builder.Options);
-    //    }
-    //}
 }
