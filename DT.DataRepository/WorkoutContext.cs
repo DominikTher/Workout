@@ -14,12 +14,10 @@ namespace DT.DataRepository
         public DbSet<WorkoutItem> WorkoutItems { get; set; }
         public DbSet<Workout> Workouts { get; set; }
         public DbSet<ExerciseTag> ExerciseTags { get; set; }
+        public DbSet<AppUser> AppUsers { get; set; }
 
         public WorkoutContext(DbContextOptions<WorkoutContext> dbContextOptions)
-            : base(dbContextOptions)
-        {
-
-        }
+            : base(dbContextOptions) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -35,6 +33,11 @@ namespace DT.DataRepository
                 .HasOne(exerciseTag => exerciseTag.Tag)
                 .WithMany(tag => tag.ExerciseTags)
                 .HasForeignKey(exerciseTag => exerciseTag.TagId);
+
+            modelBuilder.Entity<Workout>()
+                .HasOne(workout => workout.AppUser)
+                .WithMany()
+                .HasForeignKey(workout => workout.AppUserId);
         }
     }
 }

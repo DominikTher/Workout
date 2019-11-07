@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DT.DataRepository", "DT.Dat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DT.Client.Entities", "DT.Client.Entities\DT.Client.Entities.csproj", "{898F75EF-CC28-4657-A154-7FD5CD3735D0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DT.Client.WebAPI", "DT.Client.WebAPI\DT.Client.WebAPI.csproj", "{C30A54AB-9349-4EE8-B11A-BDC52EFC81FB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DT.Client.WebAPI", "DT.Client.WebAPI\DT.Client.WebAPI.csproj", "{C30A54AB-9349-4EE8-B11A-BDC52EFC81FB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

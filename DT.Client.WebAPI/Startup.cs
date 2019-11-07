@@ -1,21 +1,29 @@
 using AutoMapper;
+using DT.Business.Authentication;
 using DT.Business.Configuration;
+using DT.Business.Interface.Authentication;
 using DT.Business.Interface.Repositories;
 using DT.Business.Interface.Services;
 using DT.Business.Services;
+using DT.Client.Entities;
 using DT.DataRepository;
 using DT.DataRepository.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace DT.Client.WebAPI
 {
@@ -28,11 +36,15 @@ namespace DT.Client.WebAPI
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             Action<DbContextOptionsBuilder> sqlProvider = (options) => options.UseSqlServer(Configuration.GetConnectionString("SQL"));
             Action<DbContextOptionsBuilder> sqliteProvider = (options) => options.UseSqlite(Configuration.GetConnectionString("SQLite"));
+
+            var jwtSettings = new JwtSettings();
+            var jwtSettingsConfiguration = Configuration.GetSection("JwtSettings");
+            jwtSettingsConfiguration.Bind(jwtSettings);
+            services.Configure<JwtSettings>(jwtSettingsConfiguration);
 
             services.AddScoped<IDataService, BaseDataService>();
             services.AddScoped<IEntityRepository, BaseRepository>(service => new BaseRepository(service.GetRequiredService<WorkoutContext>));
@@ -41,9 +53,38 @@ namespace DT.Client.WebAPI
             services.AddScoped<IWorkoutItemRepository, WorkoutItemRepository>(service => new WorkoutItemRepository(service.GetRequiredService<WorkoutContext>));
             services.AddScoped<ISeriesDataService, SeriesDataService>();
             services.AddScoped<ISeriesRepository, SeriesRepository>(service => new SeriesRepository(service.GetRequiredService<WorkoutContext>));
+            services.AddScoped<IAuthenticationService, AuthenticationService>();
+            services.AddScoped<IAppUserDataService, AppUserDataService>();
+            services.AddScoped<IAppUserRepository, AppUserRepository>(service => new AppUserRepository(service.GetRequiredService<WorkoutContext>));
             services.AddDbContext<WorkoutContext>(sqlProvider);
 
-            services.AddControllers();
+            services
+                .AddAuthentication(options => {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options => {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key)),
+                        ValidateIssuer = true,
+                        ValidIssuer = jwtSettings.Issuer,
+                        ValidateAudience = true,
+                        ValidAudience = jwtSettings.Audience,
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.FromMinutes(jwtSettings.MinutesToExpire)
+                    };
+                });
+
+            services.AddAuthorization(options => {
+                options.AddPolicy("default", policy => {
+                    policy.RequireAuthenticatedUser();
+                    policy.AuthenticationSchemes = new List<string> { JwtBearerDefaults.AuthenticationScheme };
+                });
+            });
+
+            services.AddControllers(o => o.Filters.Add(new AuthorizeFilter("default")));
             services.AddApiVersioning(options =>
             {
                 options.AssumeDefaultVersionWhenUnspecified = true;
@@ -51,14 +92,12 @@ namespace DT.Client.WebAPI
                 options.ApiVersionReader = new QueryStringApiVersionReader("v");
             });
 
-            // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Workout API", Version = "v1" });
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -67,19 +106,15 @@ namespace DT.Client.WebAPI
             }
 
             app.UseHttpsRedirection();
-
-            // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
 
-            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
-            // specifying the Swagger JSON endpoint.
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Workout API V1");
             });
 
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
@@ -88,16 +123,4 @@ namespace DT.Client.WebAPI
             });
         }
     }
-
-    /// TODO: Connection string
-
-    //public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<WorkoutContext>
-    //{
-    //    public WorkoutContext CreateDbContext(string[] args)
-    //    {
-    //        var builder = new DbContextOptionsBuilder<WorkoutContext>();
-    //        builder.UseSqlite(@"Data Source=workout.db");
-    //        return new WorkoutContext(builder.Options);
-    //    }
-    //}
 }
