@@ -7,6 +7,7 @@ namespace DT.Business.Interface.Repositories
 {
     public interface IAppUserRepository
     {
-        public AppUser GetAppUser(string email, string password);
+        AppUser GetAppUser(string email);
+        AppUser UpdateRefreshToken(int appUserId, string refreshToken);
     }
 }

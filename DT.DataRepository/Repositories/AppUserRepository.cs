@@ -14,11 +14,21 @@ namespace DT.DataRepository.Repositories
         public AppUserRepository(Func<WorkoutContext> contextFactory)
             : base(contextFactory) => this.contextFactory = contextFactory;
 
-        public AppUser GetAppUser(string email, string password)
+        public AppUser GetAppUser(string email)
         {
             var dbContext = contextFactory.Invoke();
 
-            return dbContext.AppUsers.FirstOrDefault(appUser => appUser.Email == email && appUser.Password == password);
+            return dbContext.AppUsers.FirstOrDefault(appUser => appUser.Email == email);
+        }
+
+        public AppUser UpdateRefreshToken(int appUserId, string refreshToken)
+        {
+            var dbContext = contextFactory.Invoke();
+            var entity = dbContext.AppUsers.Find(appUserId);
+            entity.RefreshToken = refreshToken;
+            dbContext.SaveChanges();
+
+            return entity;
         }
     }
 }

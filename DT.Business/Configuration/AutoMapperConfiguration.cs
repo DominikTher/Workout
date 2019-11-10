@@ -12,6 +12,9 @@ using BusinessExercise = DT.Business.Entities.Exercise;
 using ClientSeries = DT.Client.Entities.Series;
 using BusinessSeries = DT.Business.Entities.Series;
 
+using ClientAppUser = DT.Client.Entities.AppUser;
+using BusinessAppUser = DT.Business.Entities.AppUser;
+
 namespace DT.Business.Configuration
 {
     public class AutoMapperConfiguration
@@ -31,6 +34,9 @@ namespace DT.Business.Configuration
 
                 cfg.CreateMap<ClientSeries, BusinessSeries>().ForMember(s => s.WorkoutItem, opt => opt.Ignore());
                 cfg.CreateMap<BusinessSeries, ClientSeries>();
+
+                cfg.CreateMap<ClientAppUser, BusinessAppUser>();
+                cfg.CreateMap<BusinessAppUser, ClientAppUser>().ForMember(u => u.Password, opt => opt.Ignore());
             });
         }
     }
