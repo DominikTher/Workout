@@ -9,18 +9,46 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace DT.Business.Authentication
 {
     public class AuthenticationService : IAuthenticationService
     {
         private readonly JwtSettings jwtSettings;
+        private readonly IPasswordHasher passwordHasher;
         private readonly IAppUserDataService appUserDataService;
 
-        public AuthenticationService(IOptions<JwtSettings> options, IAppUserDataService appUserDataService)
+        public AuthenticationService(IOptions<JwtSettings> options, IPasswordHasher passwordHasher, IAppUserDataService appUserDataService)
         {
             jwtSettings = options.Value;
+            this.passwordHasher = passwordHasher;
             this.appUserDataService = appUserDataService;
+        }
+
+        public async Task<AppUser> RegisterAsnyc(AppUser appUser)
+        {
+            appUser.Password = passwordHasher.Hash(appUser.Password);
+
+            return await appUserDataService.AddAsync(appUser);
+        }
+
+        public async Task<AppUserAuth> ValidateExternalUser(AppUser appUser)
+        {
+            var appUserEntity = appUserDataService.GetAppUser(appUser.Email);
+
+            if (appUserEntity == null)
+                await appUserDataService.AddAsync(appUser);
+
+            if (string.IsNullOrWhiteSpace(appUserEntity.Password))
+                return new AppUserAuth()
+                { 
+                    Email = appUser.Email,
+                    IsAuthenticated = true,
+                    Name = appUser.Name
+                };
+            else
+                return new AppUserAuth();
         }
 
         public AppUserAuth ValidateUser(AppUser appUser)
