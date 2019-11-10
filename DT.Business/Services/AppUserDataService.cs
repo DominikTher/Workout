@@ -36,8 +36,6 @@ namespace DT.Business.Services
 
         public async Task<AppUser> AddAsync(AppUser appUser)
         {
-            appUser.Password = passwordHasher.Hash(appUser.Password);
-
             return await AddAsync<AppUser, AppUserBusiness>(appUser);
         }
     }

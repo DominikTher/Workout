@@ -1,13 +1,10 @@
 ﻿using DT.Business.Interface.Authentication;
-using DT.Business.Interface.Services;
 using DT.Client.Entities;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
-
-using AppUserBusiness = DT.Business.Entities.AppUser;
 
 namespace DT.Client.WebAPI.Controllers
 {
@@ -17,15 +14,14 @@ namespace DT.Client.WebAPI.Controllers
     public class SecurityController : ControllerBase
     {
         private readonly IAuthenticationService authenticationService;
-        private readonly IAppUserDataService appUserDataService;
 
-        public SecurityController(IAuthenticationService authenticationService, IAppUserDataService appUserDataService)
-            => (this.authenticationService, this.appUserDataService) = (authenticationService, appUserDataService);
+        public SecurityController(IAuthenticationService authenticationService)
+            => this.authenticationService = authenticationService;
 
         [HttpPost("register")]
         public async Task<ActionResult> Register(AppUser appUser)
         {
-            var newUser = await appUserDataService.AddAsync(appUser);
+            var newUser = await authenticationService.RegisterAsnyc(appUser);
 
             return Ok(newUser);
         }
@@ -44,10 +40,10 @@ namespace DT.Client.WebAPI.Controllers
         [HttpPost("login-google")]
         public async Task<ActionResult> LoginGoogle([FromBody] string token)
         {
-            // TODO: 
             var payload = await GoogleJsonWebSignature.ValidateAsync(token);
+            var auth = await authenticationService.ValidateExternalUser(new AppUser { Email = payload.Email, Name = payload.Name });
 
-            throw new NotImplementedException();
+            return Ok(auth);
         }
 
         [HttpPost("login-refresh")]
