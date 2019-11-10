@@ -1,5 +1,6 @@
 ﻿using DT.Business.Entities;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -38,6 +39,13 @@ namespace DT.DataRepository
                 .HasOne(workout => workout.AppUser)
                 .WithMany()
                 .HasForeignKey(workout => workout.AppUserId);
+
+            //modelBuilder.Entity<AppUser>()
+            //    .Property(appUser => appUser.Properties)
+            //    .HasConversion(
+            //        f => JsonConvert.SerializeObject(f, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }),
+            //        f => JsonConvert.DeserializeObject<IEnumerable<AppUserProperties>>(f, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })
+            //    );
         }
     }
 }

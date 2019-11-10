@@ -56,6 +56,7 @@ namespace DT.Client.WebAPI
             services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddScoped<IAppUserDataService, AppUserDataService>();
             services.AddScoped<IAppUserRepository, AppUserRepository>(service => new AppUserRepository(service.GetRequiredService<WorkoutContext>));
+            services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddDbContext<WorkoutContext>(sqlProvider);
 
             services

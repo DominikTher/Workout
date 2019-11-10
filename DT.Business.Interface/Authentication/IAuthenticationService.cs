@@ -6,6 +6,7 @@ namespace DT.Business.Interface.Authentication
 {
     public interface IAuthenticationService
     {
-        public AppUserAuth ValidateUser(AppUser appUser);
+        AppUserAuth ValidateUser(AppUser appUser);
+        AppUserAuth Refresh(string token, string refreshToken);
     }
 }
